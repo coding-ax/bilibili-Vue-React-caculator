@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>React计算器</title>
+    <script src="./js/babel.min.js"></script>
+    <!-- 一定要先引入React才能再引入ReactDOM -->
+    <script src="./js/react.development.js"></script>
+    <script src="./js/react-dom.development.js"></script>
+
+
+    <style>
+        @media screen and (min-width: 700px) {
+            body {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-width: 100vh;
+                background-color: #eee;
+            }
+
+            .calculator {
+                /* 定义变量，用于之后布局 */
+                --button-width: 80px;
+                --button-height: 80px;
+
+                display: grid;
+                grid-template-areas: "result result result result"
+                    "ac divide multiple minus"
+                    "number-7 number-8 number-9 add"
+                    "number-4 number-5 number-6 plus-minus"
+                    "number-1 number-2 number-3 equal"
+                    "number-0 number-0 dot percent";
+                grid-template-rows: repeat(6, var(--button-width));
+                grid-template-columns: repeat(4, var(--button-height));
+                box-shadow: -8px -8px 16px -10px rgba(255, 255, 255, 1), 8px 8px 16px -10px rgba(0, 0, 0, .15);
+                padding: 24px;
+                border-radius: 20px;
+            }
+
+            .calculator button {
+                margin: 8px;
+                border: 0;
+                padding: 0;
+                display: block;
+                border-radius: calc(var(--button-height)/2);
+                font-size: 24px;
+                font-family: Helvetica;
+                color: #999;
+                background: linear-gradient(135deg, rgba(230, 230, 230, 1) 0%, rgba(246, 246, 246, 1) 100%);
+                box-shadow: -4px -4px 10px -8px rgba(255, 255, 255, 1), 4px 4px 10px -8px rgba(0, 0, 0, .3);
+            }
+
+            .calculator button:hover {
+                box-shadow: -4px -4px 10px -8px rgba(255, 255, 255, 1) inset, 4px 4px 10px -8px rgba(0, 0, 0, .3) inset;
+            }
+
+            .result {
+                text-align: right;
+                line-height: var(--button-height);
+                font-size: 48px;
+                font-family: Helvetica;
+                padding: 0 20px;
+                color: #666;
+                width: calc(4*var(--button-width));
+            }
+        }
+
+        /*响应式布局*/
+        @media screen and (max-width:700px) {
+            body {
+                margin-top: 30%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                width: 95%;
+                align-items: center;
+                background-color: #eee;
+            }
+
+            .calculator {
+                /* 定义变量，用于之后布局 */
+                --button-width: 5rem;
+                --button-height: 5rem;
+
+                display: grid;
+                grid-template-areas: "result result result result"
+                    "ac divide multiple minus"
+                    "number-7 number-8 number-9 add"
+                    "number-4 number-5 number-6 plus-minus"
+                    "number-1 number-2 number-3 equal"
+                    "number-0 number-0 dot percent";
+                grid-template-rows: repeat(6, var(--button-width));
+                grid-template-columns: repeat(4, var(--button-height));
+                box-shadow: -8px -8px 16px -10px rgba(255, 255, 255, 1), 8px 8px 16px -10px rgba(0, 0, 0, .15);
+                padding: 24px;
+                border-radius: 20px;
+            }
+
+            .calculator button {
+                margin: 8px;
+                border: 0;
+                padding: 0;
+                display: block;
+                border-radius: calc(var(--button-height)/2);
+                font-size: 24px;
+                font-family: Helvetica;
+                color: #999;
+                background: linear-gradient(135deg, rgba(230, 230, 230, 1) 0%, rgba(246, 246, 246, 1) 100%);
+                box-shadow: -4px -4px 10px -8px rgba(255, 255, 255, 1), 4px 4px 10px -8px rgba(0, 0, 0, .3);
+            }
+
+            .calculator button:hover {
+                box-shadow: -4px -4px 10px -8px rgba(255, 255, 255, 1) inset, 4px 4px 10px -8px rgba(0, 0, 0, .3) inset;
+            }
+
+            .result {
+                text-align: right;
+                line-height: var(--button-height);
+                font-size: 48px;
+                font-family: Helvetica;
+                padding: 0 20px;
+                color: #666;
+                width: calc(4*var(--button-width));
+            }
+        }
+    </style>
+
+</head>
+
+<body>
+    <div id="app">
+    </div>
+    <script type="text/babel">
+        class Calculator extends React.Component {
+            constructor() {
+                super()
+            }
+            state = {
+                // 标记是否输入小数点
+                isDoted: false,
+                // 标记是否输入符号
+                isOperator: false,
+                // 当前计算式/结果
+                currentCac: '0',
+                // 是否为起始
+                isStart: true
+            }
+            //重置计算
+            reset = () => {
+
+                this.setState({
+                    isStart: true,
+                    currentCac: '0',
+                    isDoted: false,
+                    isOperator: false
+                })
+            }
+            //删除最前的一个
+            clearCurrent = () => {
+                let currentCac = this.state.currentCac.slice(0, this.state.currentCac.length - 1)
+                this.setState({
+                    currentCac
+                })
+            }
+            //反号
+            changeOperator = () => {
+                let currentCac = this.state.currentCac.split('')[0] === '-' ? this.state.currentCac.slice(1, this.currentCac.length) : '-' + this.currentCac;
+                this.setState({
+                    currentCac
+                })
+            }
+            isDotedAdd = (num) => {
+                // 是否输入为小数点
+                return num === '.'
+            }
+            isOperatorAdd = (num) => {
+                // 是否输入为符号
+                return ['+', '-', '×', '÷'].indexOf(num) != -1
+            }
+            calculator = () => {
+                // 牛逼啊这个方法！
+                let currentCac = this.state.currentCac.split("×").join("*")
+                currentCac = this.state.currentCac.split("÷").join("/")
+                return parseFloat(eval(currentCac)).toLocaleString();
+            }
+            //添加字符
+            addCalc = (num) => {
+                num = String(num)
+                let isStart = this.state.isStart;
+                let currentCac = this.state.currentCac;
+                let isDoted = this.state.isDoted;
+                let isOperator = this.state.isOperator;
+                // 如果是起始情况,那么符号没限制，直接加到尾部，而数字则会替代0
+                if (isStart) {
+                    currentCac = '0'
+                    if (this.isDotedAdd(num) || this.isOperatorAdd(num)) {
+                        currentCac += num
+                    }
+                    else {
+                        currentCac = num
+                    }
+                    isStart = false
+                }
+                else {
+                    //并非初始情况
+                    if (num === '=') {
+                        //如果为等于符号，计算结果并退出
+                        isStart = true;
+                        isDoted = false;
+                        isOperator = false;
+                        currentCac = this.calculator();
+                        this.setState({
+                            isStart,
+                            isDoted,
+                            isOperator,
+                            currentCac
+                        })
+                        return;
+                    }
+                    //判断非等于的情况 此时
+                    //1.避免符号重复键入
+                    if ((this.isDotedAdd(num) && isDoted) || (this.isOperatorAdd(num) && isOperator)) {
+                        this.setState({
+                            isStart,
+                            isDoted,
+                            isOperator,
+                            currentCac
+                        })
+                        return;
+                    }
+                    //2.无重复则直接加入
+                    else {
+                        currentCac += num
+                    }
+                }
+                //保存本次结果，用于下次判断
+                isDoted = this.isDotedAdd(num)
+                isOperator = this.isOperatorAdd(num)
+                this.setState({
+                    isStart,
+                    isDoted,
+                    isOperator,
+                    currentCac
+                })
+
+            }
+
+            render() {
+                let currentCac = this.state.currentCac;
+                return <div className="calculator">
+                    <div className="result">
+                        {currentCac}
+                    </div>
+
+                    <button style={{ 'gridArea': 'ac' }} onClick={this.reset}>AC</button>
+                    <button style={{ gridArea: 'plus-minus' }} onClick={this.changeOperator}>±</button>
+                    <button style={{ gridArea: 'percent' }} onClick={this.clearCurrent}>c</button>
+                    <button style={{ gridArea: 'add' }} onClick={this.addCalc.bind(this, '+')}>+</button>
+                    <button style={{ gridArea: 'minus' }} onClick={() => { this.addCalc('-') }}>-</button>
+                    <button style={{ gridArea: 'multiple' }} onClick={() => { this.addCalc('×') }}>×</button>
+                    <button style={{ gridArea: 'divide' }} onClick={() => { this.addCalc('÷') }} >÷</button>
+                    <button style={{ gridArea: 'equal' }} onClick={() => { this.addCalc('=') }}>=</button>
+
+                    <button style={{ gridArea: 'number-1' }} onClick={() => { this.addCalc('1') }}>1</button>
+                    <button style={{ gridArea: 'number-2' }} onClick={() => { this.addCalc('2') }}>2</button>
+                    <button style={{ gridArea: 'number-3' }} onClick={() => { this.addCalc('3') }}>3</button>
+                    <button style={{ gridArea: 'number-4' }} onClick={() => { this.addCalc('4') }}>4</button>
+                    <button style={{ gridArea: 'number-5' }} onClick={() => { this.addCalc('5') }}>5</button>
+                    <button style={{ gridArea: 'number-6' }} onClick={() => { this.addCalc('6') }}>6</button>
+                    <button style={{ gridArea: 'number-7' }} onClick={() => { this.addCalc('7') }}>7</button>
+                    <button style={{ gridArea: 'number-8' }} onClick={() => { this.addCalc('8') }}>8</button>
+                    <button style={{ gridArea: 'number-9' }} onClick={() => { this.addCalc('9') }}>9</button>
+                    <button style={{ gridArea: 'number-0' }} onClick={() => { this.addCalc('0') }}>0</button>
+
+                    <button style={{ gridArea: 'dot' }} onClick={() => { this.addCalc('.') }}>.</button>
+                </div>
+            }
+        };
+        console.log(React)
+        ReactDOM.render(<Calculator />, document.getElementById("app"));
+    </script>
+</body>
+
+</html>
