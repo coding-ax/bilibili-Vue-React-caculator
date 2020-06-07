@@ -5,4 +5,5 @@
 代码写的仓促，计算器许多逻辑未处理好，请多见谅    
 使用了响应式设计，支持手机预览，但不支持平板   
 React版本预览地址：https://xgpax.top/caculator/React/   
-Vue版本预览地址：https://xgpax.top/caculator/
+Vue版本预览地址：https://xgpax.top/caculator/   
+手机浏览器会出现莫名其妙不显示结果的情况，暂不知道是啥原理...
